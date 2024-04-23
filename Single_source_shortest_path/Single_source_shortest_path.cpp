@@ -1,8 +1,11 @@
 #include <vector>
 #include <iostream>
 #include <queue>
-#include <stack>
+#include <string>
 
+/*
+	solution for https://open.kattis.com/problems/shortestpath1
+*/
 class Edge
 {
 private:
@@ -11,7 +14,7 @@ private:
 	double _weight;
 
 public:
-	Edge(int to, int from, double weight) : _to(to), _from(from), _weight(weight) {}
+	Edge(int from, int to, double weight) :  _from(from), _to(to), _weight(weight) {}
 	double weight()
 	{
 		return _weight;
@@ -46,7 +49,7 @@ class Graph
 private:
 	const int _vertices;
 	int _edges;
-	std::vector<std::vector<Edge>> _adjacencyList{};
+	std::vector<std::vector<Edge>> _adjacencyList;
 
 public:
 	Graph(int vertices) : _vertices(vertices), _edges(0)
@@ -83,47 +86,52 @@ public:
 
 };
 
+typedef std::pair<double, int> DIpair;
+
 class ShortestPath
 {
 private:
-	std::vector<Edge> edgeTo;
 	std::vector<double> distanceTo;
-	std::priority_queue<int> pq;
-	std::stack<int> stack;
+	std::priority_queue<DIpair, std::vector<DIpair>, std::greater<DIpair>> pq;
 
 public:
 	ShortestPath(Graph graph, int source)
 	{
-		double infinity = std::numeric_limits<double>::infinity();
+		double double_max = std::numeric_limits<double>::infinity();
 		for (int i = 0; i < graph.vertices(); i++)
 		{
-			distanceTo.push_back(infinity);
+			distanceTo.push_back(double_max);
 
 		}
 		distanceTo[source] = 0;
 
+		pq.push(std::make_pair(0.0, source));
 
-		stack.push(source);
-		while (!stack.empty())
+		while (!pq.empty())
 		{
-			relax(graph, stack.top());
+			relax(graph, pq.top().second);
 		}
 	}
 
 	void relax(Graph graph, int vertice)
 	{
-		stack.pop();
+		pq.pop();
 
 		for (Edge edge : graph.adjacent(vertice))
 		{
 			int w = edge.to();
-			if (distanceTo[w] > (distanceTo[vertice] + edge.weight()))
+			double oldDistance = distanceTo[vertice] + edge.weight();
+			if (distanceTo[w] > oldDistance)
 			{
 				distanceTo[w] = distanceTo[vertice] + edge.weight();
-				edgeTo[w] = edge;
-				if(stack.)
+				pq.push(std::make_pair(distanceTo[w], w));
 			}
 		}
+	}
+
+	double getDistanceTo(int vertice)
+	{
+		return distanceTo[vertice];
 	}
 };
 
@@ -132,20 +140,13 @@ bool end(int vertices, int edges, int queries, int starting_vertices)
 	return (vertices == 0) && (edges == 0) && (queries == 0) && (starting_vertices == 0);
 }
 
-void shortest_path(Graph graph, int source)
-{
-	std::priority_queue<int> pq;
-	std::vector<double> distanceTo;
-	
-
-}
-
 int main()
 {
 	int vertices;
 	int edges;
 	int queries;
 	int starting_vertice;
+	std::string out("");
 
 	std::cin >> vertices;
 	std::cin >> edges;
@@ -166,17 +167,33 @@ int main()
 
 			graph.addEdge(from, to, (double)weight);
 		}
-
-		int source;
+		
+		ShortestPath sp(graph, starting_vertice);
+		int query;
 
 		for (int i = 0; i < queries; i++)
 		{
-			std::cin >> source;
-			shortest_path(graph, source);
+			std::cin >> query;
+			double shortest_path = sp.getDistanceTo(query);
+			if (shortest_path != std::numeric_limits<double>::infinity())
+			{
+				out += std::to_string((int)shortest_path);
+			}
+			else
+			{
+				out += "Impossible";
+			}
+			
+			out += "\n";
 		}
+
+		std::cin >> vertices;
+		std::cin >> edges;
+		std::cin >> queries;
+		std::cin >> starting_vertice;
+		
 
 	}
 
-
-
+	std::cout << out;
 }
