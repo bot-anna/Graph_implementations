@@ -135,23 +135,6 @@ public:
 			}
 		}
 	}
-	void relax(Graph& graph, int vertice, std::vector<int>& items)
-	{
-		pq.pop();
-
-		for (Edge edge : graph.adjacent(vertice))
-		{
-			int w = edge.to();
-			int oldDistance = distanceTo[vertice] + edge.weight();
-			int numItems = itemsTo[vertice] + items[w];
-			if ((distanceTo[w] >= oldDistance) && (itemsTo[w] <= numItems))
-			{
-				itemsTo[w] = numItems;
-				distanceTo[w] = distanceTo[vertice] + edge.weight();
-				pq.push(std::make_pair(distanceTo[w], w));
-			}
-		}
-	}
 
 	int getDistanceTo(int vertice)
 	{
