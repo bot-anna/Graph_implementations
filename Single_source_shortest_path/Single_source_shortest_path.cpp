@@ -2,6 +2,7 @@
 #include <iostream>
 #include <queue>
 #include <string>
+#include <limits>
 
 /*
 	solution for https://open.kattis.com/problems/shortestpath1
@@ -11,11 +12,11 @@ class Edge
 private:
 	int _to;
 	int _from;
-	double _weight;
+	int _weight;
 
 public:
-	Edge(int from, int to, double weight) :  _from(from), _to(to), _weight(weight) {}
-	double weight()
+	Edge(int from, int to, int weight) :  _from(from), _to(to), _weight(weight) {}
+	int weight()
 	{
 		return _weight;
 	}
@@ -70,7 +71,7 @@ public:
 		return _edges;
 	}
 
-	void addEdge(int from, int to, double weight)
+	void addEdge(int from, int to, int weight)
 	{
 		Edge e(from, to, weight);
 		_adjacencyList[from].push_back(e);
@@ -86,21 +87,22 @@ public:
 
 };
 
-typedef std::pair<double, int> DIpair;
+typedef std::pair<int, int> DIpair;
 
 class ShortestPath
 {
 private:
-	std::vector<double> distanceTo;
+	std::vector<int> distanceTo;
 	std::priority_queue<DIpair, std::vector<DIpair>, std::greater<DIpair>> pq;
+	int query;
 
 public:
-	ShortestPath(Graph graph, int source)
+	ShortestPath(Graph& graph, int source, int query) : query(query) //making this a reference is what made it run within acceptable time
 	{
-		double double_max = std::numeric_limits<double>::infinity();
+		int int_max = std::numeric_limits<int>::max();
 		for (int i = 0; i < graph.vertices(); i++)
 		{
-			distanceTo.push_back(double_max);
+			distanceTo.push_back(int_max);
 
 		}
 		distanceTo[source] = 0;
@@ -109,18 +111,20 @@ public:
 
 		while (!pq.empty())
 		{
-			relax(graph, pq.top().second);
+			int vertice = pq.top().second;
+			relax(graph, vertice);
+			if (vertice == query) break;
 		}
 	}
 
-	void relax(Graph graph, int vertice)
+	void relax(Graph& graph, int vertice) //making this a reference is what made it run within acceptable time
 	{
 		pq.pop();
 
 		for (Edge edge : graph.adjacent(vertice))
 		{
 			int w = edge.to();
-			double oldDistance = distanceTo[vertice] + edge.weight();
+			int oldDistance = distanceTo[vertice] + edge.weight();
 			if (distanceTo[w] > oldDistance)
 			{
 				distanceTo[w] = distanceTo[vertice] + edge.weight();
@@ -129,7 +133,7 @@ public:
 		}
 	}
 
-	double getDistanceTo(int vertice)
+	int getDistanceTo(int vertice)
 	{
 		return distanceTo[vertice];
 	}
@@ -165,19 +169,20 @@ int main()
 			std::cin >> to;
 			std::cin >> weight;
 
-			graph.addEdge(from, to, (double)weight);
+			graph.addEdge(from, to, weight);
 		}
 		
-		ShortestPath sp(graph, starting_vertice);
+		
 		int query;
 
 		for (int i = 0; i < queries; i++)
 		{
 			std::cin >> query;
-			double shortest_path = sp.getDistanceTo(query);
-			if (shortest_path != std::numeric_limits<double>::infinity())
+			ShortestPath sp(graph, starting_vertice, query);
+			int shortest_path = sp.getDistanceTo(query);
+			if (shortest_path != std::numeric_limits<int>::max())
 			{
-				out += std::to_string((int)shortest_path);
+				out += std::to_string(shortest_path);
 			}
 			else
 			{
