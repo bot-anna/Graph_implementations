@@ -87,13 +87,13 @@ public:
 
 };
 
-typedef std::pair<int, int> DIpair;
+typedef std::pair<int, int> iPair;
 
 class ShortestPath
 {
 private:
 	std::vector<int> distanceTo;
-	std::priority_queue<DIpair, std::vector<DIpair>, std::greater<DIpair>> pq;
+	std::priority_queue<iPair, std::vector<iPair>, std::greater<iPair>> pq;
 	int query;
 
 public:
